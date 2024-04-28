@@ -22,6 +22,10 @@ export interface IDataFrameResponse extends SearchResponse<any> {
   took: number;
 }
 
+export const getRawDataFrame = (searchRequest: IOpenSearchDashboardsSearchRequest) => {
+  return searchRequest.params?.body?.df;
+};
+
 export const getRawQueryString = (
   searchRequest: IOpenSearchDashboardsSearchRequest
 ): string | undefined => {
@@ -63,8 +67,7 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
       hit[field.name] = field.values[index];
     });
     hits.push({
-      _index: data.name ?? '',
-      _id: '',
+      _index: data.name,
       _source: hit,
     });
   }

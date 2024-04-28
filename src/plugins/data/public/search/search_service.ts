@@ -58,11 +58,12 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import {
+  DataFrameService,
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
   dataFrameToSpec,
-} from '../../common';
+} from '../../common/data_frames';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -138,6 +139,29 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const dfService: DataFrameService = {
+      get: () => this.dfCache.get(),
+      set: async (dataFrame: IDataFrame) => {
+        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
+          indexPatterns.clearCache(this.dfCache.get()!.name, false);
+        }
+        this.dfCache.set(dataFrame);
+        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
+        const dataSet = await indexPatterns.create(
+          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+          !existingIndexPattern?.id
+        );
+        // save to cache by title because the id is not unique for temporary index pattern created
+        indexPatterns.saveToCache(dataSet.title, dataSet);
+      },
+      clear: () => {
+        if (this.dfCache.get() === undefined) return;
+        // name because the id is not unique for temporary index pattern created
+        indexPatterns.clearCache(this.dfCache.get()!.name, false);
+        this.dfCache.clear();
+      },
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
@@ -156,25 +180,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         callMsearch: getCallMsearch({ http }),
         loadingCount$,
       },
-      df: {
-        get: () => this.dfCache.get(),
-        set: async (dataFrame: IDataFrame) => {
-          this.dfCache.set(dataFrame);
-          const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
-          const dataSet = await indexPatterns.create(
-            dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-            !existingIndexPattern?.id
-          );
-          // save to cache by title because the id is not unique for temporary index pattern created
-          indexPatterns.saveToCache(dataSet.title, dataSet);
-        },
-        clear: () => {
-          if (this.dfCache.get() === undefined) return;
-          // name because the id is not unique for temporary index pattern created
-          indexPatterns.clearCache(this.dfCache.get()!.name, false);
-          this.dfCache.clear();
-        },
-      },
+      df: dfService,
     };
 
     return {
@@ -188,6 +194,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
+      df: dfService,
     };
   }
 

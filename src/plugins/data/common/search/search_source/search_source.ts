@@ -91,7 +91,13 @@ import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from 
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import {
+  FetchHandlers,
+  RequestFailure,
+  getExternalSearchParamsFromRequest,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from './fetch';
 
 import {
   getOpenSearchQueryConfig,
@@ -286,15 +292,24 @@ export class SearchSource {
 
   /**
    * Set the data frame of this SearchSource
+   *
+   * @async
    * @return {undefined|IDataFrame}
    */
   async setDataFrame(dataFrame: IDataFrame | undefined) {
     if (dataFrame) {
       await this.dependencies.df.set(dataFrame);
     } else {
-      this.dependencies.df.clear();
+      this.destroyDataFrame();
     }
     return this.getDataFrame();
+  }
+
+  /**
+   * Clear the data frame of this SearchSource
+   */
+  destroyDataFrame() {
+    this.dependencies.df.clear();
   }
 
   /**
@@ -367,13 +382,10 @@ export class SearchSource {
   private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    if (this.getDataFrame()) {
-      delete searchRequest.body!.df;
-      this.setDataFrame(undefined);
-    }
-
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
+      getDataFrame: this.getDataFrame.bind(this),
+      destroyDataFrame: this.destroyDataFrame.bind(this),
     });
 
     return search(
@@ -389,13 +401,10 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    const params = getSearchParamsFromRequest(searchRequest, {
+    const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
+      getDataFrame: this.getDataFrame.bind(this),
     });
-
-    if (this.getDataFrame() && this.getDataFrame()!.name === searchRequest.index) {
-      params.body!.df = this.getDataFrame();
-    }
 
     return search({ params }, options).then(async (response: any) => {
       if (response.hasOwnProperty('type')) {

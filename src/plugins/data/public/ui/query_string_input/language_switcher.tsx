@@ -86,6 +86,10 @@ export function QueryLanguageSwitcher(props: Props) {
         ? queryEnhancement.search
         : searchService.getDefaultSearchInterceptor(),
     });
+
+    if (!queryEnhancement) {
+      searchService.df.clear();
+    }
     uiService.Settings.setUiOverridesByUserQueryLanguage(queryLanguage);
   };
 

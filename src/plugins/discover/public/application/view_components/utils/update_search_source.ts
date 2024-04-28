@@ -31,12 +31,15 @@ export const updateSearchSource = async ({
 }: Props) => {
   const { uiSettings, data } = services;
   let dataSet = indexPattern;
+  const dataFrame = searchSource?.getDataFrame();
   if (
     searchSource &&
-    searchSource.getDataFrame() &&
-    dataSet.title !== searchSource.getDataFrame()?.name
+    dataFrame &&
+    dataFrame.name &&
+    dataFrame.name !== '' &&
+    dataSet.title !== dataFrame.name
   ) {
-    dataSet = data.indexPatterns.getByTitle(searchSource.getDataFrame()?.name!, true) ?? dataSet;
+    dataSet = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataSet;
     searchSource.setField('index', dataSet);
   }
 
