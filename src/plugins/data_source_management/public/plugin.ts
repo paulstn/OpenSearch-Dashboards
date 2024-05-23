@@ -4,12 +4,18 @@
  */
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { i18n } from '@osd/i18n';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+} from '../../../core/public';
 
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
 
-import { ManagementSetup } from '../../management/public';
 import { IndexPatternManagementSetup } from '../../index_pattern_management/public';
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
 import {
@@ -24,7 +30,6 @@ import { DataSourceMenuProps } from './components/data_source_menu';
 import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
 
 export interface DataSourceManagementSetupDependencies {
-  management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   dataSource: DataSourcePluginSetup;
 }
@@ -54,16 +59,29 @@ export class DataSourceManagementPlugin
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
 
+  private title = i18n.translate('dataSourcesManagement.title', {
+    defaultMessage: 'Data Sources (obs)', // TODO: change with PLUGIN_TITLE
+  });
+
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
-    { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
+    { indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
-    const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
-    const uiSettings = core.uiSettings;
+    core.application.register({
+      id: PLUGIN_ID,
+      title: this.title,
+      order: 9030,
+      icon: '/ui/logos/opensearch_mark.svg',
+      category: DEFAULT_APP_CATEGORIES.management,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        // const [coreStart] = await core.getStartServices();
 
-    if (!opensearchDashboardsSection) {
-      throw new Error('`opensearchDashboards` management section not found.');
-    }
+        return renderApp(params);
+      },
+    });
+
+    const uiSettings = core.uiSettings;
 
     const savedObjectPromise = core
       .getStartServices()
@@ -71,17 +89,6 @@ export class DataSourceManagementPlugin
 
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
-
-    opensearchDashboardsSection.registerApp({
-      id: DSM_APP_ID,
-      title: PLUGIN_NAME,
-      order: 1,
-      mount: async (params) => {
-        const { mountManagementSection } = await import('./management_app');
-
-        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
-      },
-    });
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
