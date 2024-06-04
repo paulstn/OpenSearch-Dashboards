@@ -33,6 +33,7 @@ import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../q
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { Settings } from '..';
 import { DataSettings, QueryEnhancement } from '../types';
+import { QueryBarSelectors } from './selectors/query_bar_selectors';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -511,12 +512,13 @@ export default class QueryEditorUI extends Component<Props, State> {
               <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
+                  <QueryBarSelectors languageSelector={queryLanguageSwitcher} />
+                  {/* <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <div ref={this.props.containerRef} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>{queryLanguageSwitcher}</EuiFlexItem>
-                  </EuiFlexGroup>
+                  </EuiFlexGroup> */}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
