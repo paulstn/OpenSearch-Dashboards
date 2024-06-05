@@ -6,15 +6,15 @@
 import { EuiFlexGroup, EuiFlexItem, EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { DataSourceSelectable } from '../../../data_sources/datasource_selector/datasource_selectable';
 import { DataSource, DataSourceGroup, DataSourceOption } from '../../..';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import {
   DataExplorerServices,
-  setIndexPattern,
   useTypedDispatch,
   useTypedSelector,
 } from '../../../../../data_explorer/public';
+import { DataSourceSelectable } from './datasource_selectable';
+// import { DataSourceSelectable } from '../../../../public/data_sources/datasource_selector';
 
 interface QueryBarSelectorsProps {
   languageSelector: React.JSX.Element;
@@ -26,6 +26,8 @@ export const QueryBarSelectors = (props: QueryBarSelectorsProps) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
+
+  const [showIndexPatterns, setShowIndexPatterns] = useState(false);
 
   const {
     services: {
@@ -72,18 +74,23 @@ export const QueryBarSelectors = (props: QueryBarSelectorsProps) => {
         return;
       }
 
-      switch (selectedDataSources[0].connectionType) {
-        case 'os': // need to make sure we have a constant here - common with data source types
-          dispatch(setIndexPattern(selectedDataSources[0].value));
-          // dispatch(setDataSource(selectedDataSources[0].ds));
-          break;
-        case 'flint':
-          // dispatch(setDataSource(selectedDataSources[0].ds));
-          break;
-      }
+      console.log(selectedDataSources);
+
+      // if (selectedDataSources[0].type === 'default') {
+      //   // dispatch(setIndexPattern(selectedDataSources[0].value));
+      //   // dispatch(setDataSource(selectedDataSources[0].ds));
+      // } else {
+      //   // dispatch(setDataSource(selectedDataSources[0].ds));
+      // }
     },
     [dispatch, setSelectedSources]
   );
+
+  useEffect(() => {
+    setShowIndexPatterns(selectedSources[0]?.type === 'default');
+    if (selectedSources[0]?.type === 'default') {
+    }
+  }, [selectedSources]);
 
   const handleGetDataSetError = useCallback(
     () => (error: Error) => {
@@ -103,7 +110,7 @@ export const QueryBarSelectors = (props: QueryBarSelectorsProps) => {
 
   return (
     <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <DataSourceSelectable
           dataSources={activeDataSources}
           dataSourceOptionList={dataSourceOptionList}
@@ -116,9 +123,11 @@ export const QueryBarSelectors = (props: QueryBarSelectorsProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{props.languageSelector}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiComboBox />
-      </EuiFlexItem>
+      {showIndexPatterns && (
+        <EuiFlexItem>
+          <IndexPatternSelector />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
