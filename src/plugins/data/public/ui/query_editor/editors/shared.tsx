@@ -6,6 +6,7 @@
 import React from 'react';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
+import { DQLTokenProvider } from '../../../antlr/dql/token_provider';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   languageId: string;
@@ -96,6 +97,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
       suggestionProvider={{
         provideCompletionItems,
       }}
+      tokensProvider={new DQLTokenProvider()}
       languageConfiguration={{
         autoClosingPairs: [
           {
