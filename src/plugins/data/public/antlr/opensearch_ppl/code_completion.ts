@@ -15,7 +15,7 @@ import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
-import { PPL_AGGREGATE_FUNTIONS } from './constants';
+import { PPL_AGGREGATE_FUNCTIONS } from './constants';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 
 export const getSuggestions = async ({
@@ -42,7 +42,7 @@ export const getSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...PPL_AGGREGATE_FUNTIONS.map((af) => ({
+        ...PPL_AGGREGATE_FUNCTIONS.map((af) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af + '(${1:expr}) ',

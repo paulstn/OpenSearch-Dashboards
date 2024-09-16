@@ -1251,10 +1251,10 @@ export class OpenSearchPPLParser extends antlr.Parser {
             this.state = 331;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if (_la === 118 || _la === 119 || _la === 330) {
+            if (_la === 330) {
                 {
                 this.state = 330;
-                localContext._number_ = this.integerLiteral();
+                localContext._number_ = this.match(OpenSearchPPLParser.INTEGER_LITERAL);
                 }
             }
 
@@ -1508,7 +1508,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             this.match(OpenSearchPPLParser.GROK);
             {
             this.state = 378;
-            localContext._source_field = this.expression();
+            localContext._source_field = this.fieldExpression();
             }
             {
             this.state = 379;
@@ -6882,7 +6882,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         0,319,322,1,0,0,0,320,318,1,0,0,0,321,323,3,68,34,0,322,321,1,0,
         0,0,322,323,1,0,0,0,323,327,1,0,0,0,324,325,5,41,0,0,325,326,5,112,
         0,0,326,328,3,198,99,0,327,324,1,0,0,0,327,328,1,0,0,0,328,25,1,
-        0,0,0,329,331,5,10,0,0,330,332,3,194,97,0,331,330,1,0,0,0,331,332,
+        0,0,0,329,331,5,10,0,0,330,332,5,330,0,0,331,330,1,0,0,0,331,332,
         1,0,0,0,332,333,1,0,0,0,333,337,3,112,56,0,334,335,5,39,0,0,335,
         336,5,112,0,0,336,338,3,198,99,0,337,334,1,0,0,0,337,338,1,0,0,0,
         338,342,1,0,0,0,339,340,5,40,0,0,340,341,5,112,0,0,341,343,3,198,
@@ -6897,7 +6897,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         370,3,112,56,0,369,371,3,66,33,0,370,369,1,0,0,0,370,371,1,0,0,0,
         371,35,1,0,0,0,372,373,5,15,0,0,373,375,3,112,56,0,374,376,3,66,
         33,0,375,374,1,0,0,0,375,376,1,0,0,0,376,37,1,0,0,0,377,378,5,20,
-        0,0,378,379,3,88,44,0,379,380,3,192,96,0,380,39,1,0,0,0,381,382,
+        0,0,378,379,3,120,60,0,379,380,3,192,96,0,380,39,1,0,0,0,381,382,
         5,16,0,0,382,383,3,88,44,0,383,384,3,192,96,0,384,41,1,0,0,0,385,
         389,5,22,0,0,386,388,3,44,22,0,387,386,1,0,0,0,388,391,1,0,0,0,389,
         387,1,0,0,0,389,390,1,0,0,0,390,392,1,0,0,0,391,389,1,0,0,0,392,
@@ -7623,7 +7623,7 @@ export class StatsCommandContext extends antlr.ParserRuleContext {
 
 
 export class DedupCommandContext extends antlr.ParserRuleContext {
-    public _number_?: IntegerLiteralContext;
+    public _number_?: Token | null;
     public _keepempty?: BooleanLiteralContext;
     public _consecutive?: BooleanLiteralContext;
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
@@ -7650,8 +7650,8 @@ export class DedupCommandContext extends antlr.ParserRuleContext {
     public CONSECUTIVE(): antlr.TerminalNode | null {
         return this.getToken(OpenSearchPPLParser.CONSECUTIVE, 0);
     }
-    public integerLiteral(): IntegerLiteralContext | null {
-        return this.getRuleContext(0, IntegerLiteralContext);
+    public INTEGER_LITERAL(): antlr.TerminalNode | null {
+        return this.getToken(OpenSearchPPLParser.INTEGER_LITERAL, 0);
     }
     public booleanLiteral(): BooleanLiteralContext[];
     public booleanLiteral(i: number): BooleanLiteralContext | null;
@@ -7827,7 +7827,7 @@ export class RareCommandContext extends antlr.ParserRuleContext {
 
 
 export class GrokCommandContext extends antlr.ParserRuleContext {
-    public _source_field?: ExpressionContext;
+    public _source_field?: FieldExpressionContext;
     public _pattern?: StringLiteralContext;
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
@@ -7835,8 +7835,8 @@ export class GrokCommandContext extends antlr.ParserRuleContext {
     public GROK(): antlr.TerminalNode {
         return this.getToken(OpenSearchPPLParser.GROK, 0)!;
     }
-    public expression(): ExpressionContext | null {
-        return this.getRuleContext(0, ExpressionContext);
+    public fieldExpression(): FieldExpressionContext | null {
+        return this.getRuleContext(0, FieldExpressionContext);
     }
     public stringLiteral(): StringLiteralContext | null {
         return this.getRuleContext(0, StringLiteralContext);

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const PPL_AGGREGATE_FUNTIONS = [
+export const PPL_AGGREGATE_FUNCTIONS = [
   'avg',
   'count',
   'sum',

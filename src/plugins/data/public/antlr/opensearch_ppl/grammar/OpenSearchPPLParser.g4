@@ -82,7 +82,7 @@ statsCommand
    ;
 
 dedupCommand
-   : DEDUP (number = integerLiteral)? fieldList (KEEPEMPTY EQUAL keepempty = booleanLiteral)? (CONSECUTIVE EQUAL consecutive = booleanLiteral)?
+   : DEDUP (number = INTEGER_LITERAL)? fieldList (KEEPEMPTY EQUAL keepempty = booleanLiteral)? (CONSECUTIVE EQUAL consecutive = booleanLiteral)?
    ;
 
 sortCommand
@@ -106,7 +106,7 @@ rareCommand
    ;
 
 grokCommand
-   : GROK (source_field = expression) (pattern = stringLiteral)
+   : GROK (source_field = fieldExpression) (pattern = stringLiteral)
    ;
 
 parseCommand
