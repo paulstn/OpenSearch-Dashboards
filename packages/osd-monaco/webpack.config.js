@@ -47,13 +47,19 @@ const createLangWorkerConfig = (lang) => ({
     rules: [
       {
         test: /\.(js|ts)$/,
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!(monaco-editor)\/).*/,
         use: {
           loader: 'babel-loader',
           options: {
             babelrc: false,
             presets: [require.resolve('@osd/babel-preset/webpack_preset')],
           },
+        },
+      },
+      {
+        test: /\.(ttf|eot|svg|png|jpg|gif|ico)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: {
+          loader: 'file-loader',
         },
       },
     ],

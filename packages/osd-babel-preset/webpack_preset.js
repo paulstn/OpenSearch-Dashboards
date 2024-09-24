@@ -61,6 +61,9 @@ module.exports = () => {
           fileName: false,
         },
       ],
+      [
+        require.resolve('@babel/plugin-transform-optional-chaining'),
+      ],
     ],
     env: {
       production: {

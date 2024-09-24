@@ -12,6 +12,8 @@ window.MonacoEnvironment = {
     if (workerSrc) {
       const blob = new Blob([workerSrc], { type: 'application/javascript' });
       return new Worker(URL.createObjectURL(blob));
+    } else {
+      return new Worker(languageId);
     }
   },
 };
