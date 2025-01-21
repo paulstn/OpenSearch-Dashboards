@@ -297,7 +297,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        const timeRange = props.opensearchDashboards.services.data.query.timefilter.timefilter.getTime();
+        onSubmit(newQuery, timeRange);
       });
 
       return () => {
@@ -351,14 +352,15 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
-
-      editor.addCommand(monaco.KeyCode.Enter, () => {
+      // eslint-disable-next-line no-bitwise
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
         const newQuery = {
           ...query,
           query: editor.getValue(),
         };
 
-        onSubmit(newQuery);
+        const timeRange = props.opensearchDashboards.services.data.query.timefilter.timefilter.getTime();
+        onSubmit(newQuery, timeRange);
       });
     },
     provideCompletionItems,
