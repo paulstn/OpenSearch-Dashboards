@@ -108,9 +108,10 @@ export const getSuggestions = async ({
     if (suggestions.suggestFunctionNames) {
       finalSuggestions.push(
         ...functionNames.map((func) => ({
-          text: func,
+          text: func.name,
           type: monaco.languages.CompletionItemKind.Function,
           labelDescription: PromQLSuggestionItemDescriptions.FUNCTION,
+          detail: func.description,
         }))
       );
     }
@@ -118,9 +119,10 @@ export const getSuggestions = async ({
     if (suggestions.suggestAggregationOperators) {
       finalSuggestions.push(
         ...aggregationOperators.map((agg) => ({
-          text: agg,
+          text: agg.name,
           type: monaco.languages.CompletionItemKind.Function,
           labelDescription: PromQLSuggestionItemDescriptions.AGGREGATION_OPERATOR,
+          detail: agg.description,
         }))
       );
     }

@@ -14,61 +14,22 @@ const brackets = [
 ];
 
 const functions = [
+  // Arithmetic Functions
   'abs',
-  'absent',
-  'absent_over_time',
   'ceil',
-  'changes',
   'clamp',
   'clamp_max',
   'clamp_min',
-  'day_of_month',
-  'day_of_week',
-  'day_of_year',
-  'days_in_month',
-  'delta',
-  'deriv',
   'exp',
   'floor',
-  'histogram_count',
-  'histogram_sum',
-  'histogram_fraction',
-  'histogram_quantile',
-  'holt_winters',
-  'hour',
-  'idelta',
-  'increase',
-  'irate',
-  'label_join',
-  'label_replace',
   'ln',
-  'log2',
   'log10',
-  'minute',
-  'month',
-  'predict_linear',
-  'rate',
-  'resets',
+  'log2',
   'round',
-  'scalar',
   'sgn',
-  'sort',
-  'sort_desc',
   'sqrt',
-  'time',
-  'timestamp',
-  'vector',
-  'year',
-  'avg_over_time',
-  'min_over_time',
-  'max_over_time',
-  'sum_over_time',
-  'count_over_time',
-  'quantile_over_time',
-  'stddev_over_time',
-  'stdvar_over_time',
-  'last_over_time',
-  'present_over_time',
+
+  // Trigonometric Functions
   'acos',
   'acosh',
   'asin',
@@ -84,6 +45,71 @@ const functions = [
   'deg',
   'pi',
   'rad',
+
+  // Time Functions
+  'day_of_month',
+  'day_of_week',
+  'day_of_year',
+  'days_in_month',
+  'hour',
+  'minute',
+  'month',
+  'year',
+  'time',
+  'timestamp',
+
+  // Histogram Functions (Experimental)
+  'histogram_avg',
+  'histogram_count',
+  'histogram_sum',
+  'histogram_fraction',
+  'histogram_quantile',
+  'histogram_stddev',
+  'histogram_stdvar',
+
+  // Rate and Derivative Functions
+  'rate',
+  'irate',
+  'increase',
+  'delta',
+  'idelta',
+  'deriv',
+  'predict_linear',
+  'resets',
+  'changes',
+
+  // Aggregation Over Time Functions
+  'avg_over_time',
+  'min_over_time',
+  'max_over_time',
+  'sum_over_time',
+  'count_over_time',
+  'quantile_over_time',
+  'stddev_over_time',
+  'stdvar_over_time',
+  'last_over_time',
+  'absent_over_time',
+  'present_over_time',
+  'mad_over_time',
+
+  // Label and Metadata Functions
+  'label_join',
+  'label_replace',
+  'info', // Experimental
+
+  // Sorting Functions
+  'sort',
+  'sort_desc',
+  'sort_by_label',
+  'sort_by_label_desc',
+
+  // Special Functions
+  'absent',
+  'scalar',
+  'vector',
+
+  // Forecasting Function (Experimental)
+  'double_exponential_smoothing',
 
   // extras
   'offset',
