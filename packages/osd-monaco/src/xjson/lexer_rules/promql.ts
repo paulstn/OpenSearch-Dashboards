@@ -156,9 +156,18 @@ export const lexerRules = {
       [/[ \t\r\n]+/, { token: '@whitespace' }],
 
       [
-        /[-+]?(0[xX][0-9a-fA-F]+|[nN][aA][nN]|[iI][nN][fF]|[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)(ms|[smhdwy])?/,
-        'number',
+        /[a-zA-Z_:][a-zA-Z0-9_:]*\b/,
+        {
+          cases: {
+            '@functions': 'keyword',
+            '@aggregations': 'keyword',
+            '@default': 'identifier',
+          },
+        },
       ],
+      [/#.*$/, 'comment'],
+
+      [/[-+]?(0[xX][0-9a-fA-F]+|[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)(ms|[smhdwy])?/, 'number'],
 
       [
         /(by|without|on|ignoring|group_left|group_right)(\s*)(\()/,
@@ -177,18 +186,6 @@ export const lexerRules = {
       [/".*?"/, 'string'],
       [/'.*?'/, 'string'],
       [/`.*?`/, 'string'],
-
-      [
-        /[a-zA-Z_:][a-zA-Z0-9_:]*\b/,
-        {
-          cases: {
-            '@functions': 'keyword',
-            '@aggregations': 'keyword',
-            '@default': 'identifier',
-          },
-        },
-      ],
-      [/#.*$/, 'comment'],
     ],
     labels: [
       [/[a-zA-Z_][a-zA-Z0-9_]*/, 'key'],

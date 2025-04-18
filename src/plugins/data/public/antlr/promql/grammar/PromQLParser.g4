@@ -180,76 +180,7 @@ parameterList
     ;
 
 functionNames
-    : ABS
-    | ABSENT
-    | ABSENT_OVER_TIME
-    | CEIL
-    | CHANGES
-    | CLAMP
-    | CLAMP_MAX
-    | CLAMP_MIN
-    | DAY_OF_MONTH
-    | DAY_OF_WEEK
-    | DAY_OF_YEAR
-    | DAYS_IN_MONTH
-    | DELTA
-    | DERIV
-    | EXP
-    | FLOOR
-    | HISTOGRAM_COUNT
-    | HISTOGRAM_SUM
-    | HISTOGRAM_FRACTION
-    | HISTOGRAM_QUANTILE
-    | HOLT_WINTERS
-    | HOUR
-    | IDELTA
-    | INCREASE
-    | IRATE
-    | LABEL_JOIN
-    | LABEL_REPLACE
-    | LN
-    | LOG2
-    | LOG10
-    | MINUTE
-    | MONTH
-    | PREDICT_LINEAR
-    | RATE
-    | RESETS
-    | ROUND
-    | SCALAR
-    | SGN
-    | SORT
-    | SORT_DESC
-    | SQRT
-    | TIME
-    | TIMESTAMP
-    | VECTOR
-    | YEAR
-    | AVG_OVER_TIME
-    | MIN_OVER_TIME
-    | MAX_OVER_TIME
-    | SUM_OVER_TIME
-    | COUNT_OVER_TIME
-    | QUANTILE_OVER_TIME
-    | STDDEV_OVER_TIME
-    | STDVAR_OVER_TIME
-    | LAST_OVER_TIME
-    | PRESENT_OVER_TIME
-    | ACOS
-    | ACOSH
-    | ASIN
-    | ASINH
-    | ATAN
-    | ATANH
-    | COS
-    | COSH
-    | SIN
-    | SINH
-    | TAN
-    | TANH
-    | DEG
-    | PI
-    | RAD
+    : FUNCTION
     ;
 
 // Aggregations
@@ -269,20 +200,7 @@ without
     ;
 
 aggregationOperators
-    : SUM
-    | MIN
-    | MAX
-    | AVG
-    | GROUP
-    | STDDEV
-    | STDVAR
-    | COUNT
-    | COUNT_VALUES
-    | BOTTOMK
-    | TOPK
-    | QUANTILE
-    | LIMITK
-    | LIMIT_RATIO
+    : AGGREGATION_OPERATOR
     ;
 
 // Vector one-to-one/one-to-many joins
