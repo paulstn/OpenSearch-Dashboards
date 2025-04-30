@@ -81,7 +81,7 @@ export const getSuggestions = async ({
   services,
   boolFilter,
   signal,
-}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
+}: QuerySuggestionGetFnArgs) => {
   if (
     !services ||
     !services.appName ||
@@ -292,7 +292,7 @@ export const getSuggestions = async ({
       }
     });
 
-    return completions;
+    return { suggestions: completions };
   } catch {
     return [];
   }

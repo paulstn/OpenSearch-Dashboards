@@ -103,7 +103,7 @@ export const getSuggestions = async ({
       );
     }
 
-    return finalSuggestions;
+    return { suggestions: finalSuggestions };
   } catch (e) {
     return [];
   }

@@ -37,7 +37,7 @@ export const getSuggestions = async ({
   position,
   query,
   services,
-}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
+}: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern || !dataset) return [];
   try {
     const { lineNumber, column } = position || {};
@@ -146,7 +146,7 @@ export const getSuggestions = async ({
         })
     );
 
-    return finalSuggestions;
+    return { suggestions: finalSuggestions };
   } catch (error) {
     // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
     return [];

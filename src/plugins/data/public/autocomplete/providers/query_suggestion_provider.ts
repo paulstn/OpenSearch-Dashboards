@@ -43,7 +43,7 @@ export enum QuerySuggestionTypes {
 
 export type QuerySuggestionGetFn = (
   args: QuerySuggestionGetFnArgs
-) => Promise<QuerySuggestion[]> | undefined;
+) => Promise<{ suggestions: QuerySuggestion[]; incomplete?: boolean }> | undefined;
 
 /** @public **/
 export interface QuerySuggestionGetFnArgs {

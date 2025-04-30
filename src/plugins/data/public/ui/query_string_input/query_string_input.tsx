@@ -181,15 +181,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
     try {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
-      const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
-          language,
-          indexPattern: indexPatterns[0] as IndexPattern,
-          query: queryString,
-          selectionStart,
-          selectionEnd,
-          signal: this.abortController.signal,
-        })) || [];
+      const { suggestions } = (await this.services.data.autocomplete.getQuerySuggestions({
+        language,
+        indexPattern: indexPatterns[0] as IndexPattern,
+        query: queryString,
+        selectionStart,
+        selectionEnd,
+        signal: this.abortController.signal,
+      })) || { suggestions: [] };
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error

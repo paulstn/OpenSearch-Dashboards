@@ -233,7 +233,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     const dataset = queryString.getQuery().dataset;
     const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
 
-    const suggestions = await services.data.autocomplete.getQuerySuggestions({
+    const {
+      suggestions,
+      incomplete = false,
+    } = (await services.data.autocomplete.getQuerySuggestions({
       query: inputRef.current?.getValue() ?? '',
       selectionStart: model.getOffsetAt(position), // not needed, position handles same thing. remove
       selectionEnd: model.getOffsetAt(position),
@@ -242,7 +245,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       dataset,
       position,
       services,
-    });
+    })) ?? { suggestions: [], incomplete: false };
 
     // current completion item range being given as last 'word' at pos
     const wordUntil = model.getWordUntilPosition(position);
@@ -273,7 +276,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
                 };
               })
           : [],
-      incomplete: false,
+      incomplete, // making this true will force the next character typed to have to re-call the suggestion provider
     };
   };
 

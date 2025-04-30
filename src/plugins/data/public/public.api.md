@@ -1813,24 +1813,30 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
 // Warning: (ae-missing-release-tag) "QuerySuggestionGetFn" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type QuerySuggestionGetFn = (args: QuerySuggestionGetFnArgs) => Promise<QuerySuggestion[]> | undefined;
+export type QuerySuggestionGetFn = (args: QuerySuggestionGetFnArgs) => Promise<{ suggestions: QuerySuggestion[]; incomplete?: boolean }> | undefined;
 
 // @public (undocumented)
 export interface QuerySuggestionGetFnArgs {
     // (undocumented)
-    boolFilter?: any;
-    // (undocumented)
-    indexPatterns: IIndexPattern[];
-    // (undocumented)
     language: string;
+    // (undocumented)
+    indexPattern: IndexPattern | undefined;
+    // (undocumented)
+    dataset?: Dataset;
     // (undocumented)
     query: string;
     // (undocumented)
-    selectionEnd: number;
-    // (undocumented)
     selectionStart: number;
     // (undocumented)
+    selectionEnd: number;
+    // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    boolFilter?: any;
+    // (undocumented)
+    position?: monaco.Position;
+    // (undocumented)
+     services?: IDataPluginServices;
 }
 
 // Warning: (ae-missing-release-tag) "QuerySuggestionTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
