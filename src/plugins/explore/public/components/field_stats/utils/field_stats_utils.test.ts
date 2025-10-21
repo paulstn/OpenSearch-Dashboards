@@ -19,10 +19,13 @@ import {
   createMockFieldStatsItem,
   createMockDetailSection,
 } from './field_stats.stubs';
+import { QueryQueueManager } from './query_queue_manager';
 
 jest.mock('../field_stats_detail_sections', () => ({
   DETAIL_SECTIONS: [],
 }));
+
+jest.mock('./query_queue_manager');
 
 describe('field_stats_utils', () => {
   describe('filterDatasetFields', () => {
@@ -264,6 +267,7 @@ describe('field_stats_utils', () => {
   describe('fetchFieldDetails', () => {
     const mockServices = createMockServices();
     const mockDataset = createMockDataset({ id: 'test-index', title: 'test-index' });
+    let mockQueueManager: jest.Mocked<QueryQueueManager>;
 
     const mockTopValuesSection = createMockDetailSection({
       id: 'topValues',
@@ -280,12 +284,29 @@ describe('field_stats_utils', () => {
     beforeEach(() => {
       (DETAIL_SECTIONS as any).length = 0;
       jest.clearAllMocks();
+
+      // Mock QueryQueueManager to execute queries immediately
+      const mockEnqueue = jest.fn((fn) => fn());
+      const mockClear = jest.fn();
+      mockQueueManager = {
+        enqueue: mockEnqueue,
+        clear: mockClear,
+      } as any;
+      (QueryQueueManager as jest.MockedClass<typeof QueryQueueManager>).mockImplementation(
+        () => mockQueueManager
+      );
     });
 
     it('fetches details for applicable sections', async () => {
       (DETAIL_SECTIONS as any).push(mockTopValuesSection);
 
-      const details = await fetchFieldDetails('fieldName', 'string', mockDataset, mockServices);
+      const details = await fetchFieldDetails(
+        'fieldName',
+        'string',
+        mockDataset,
+        mockServices,
+        mockQueueManager
+      );
 
       expect(mockTopValuesSection.fetchData).toHaveBeenCalledWith(
         'fieldName',
@@ -309,7 +330,13 @@ describe('field_stats_utils', () => {
 
       (DETAIL_SECTIONS as any).push(section1, section2);
 
-      const details = await fetchFieldDetails('fieldName', 'string', mockDataset, mockServices);
+      const details = await fetchFieldDetails(
+        'fieldName',
+        'string',
+        mockDataset,
+        mockServices,
+        mockQueueManager
+      );
 
       expect(section1.fetchData).toHaveBeenCalled();
       expect(section2.fetchData).toHaveBeenCalled();
@@ -326,7 +353,13 @@ describe('field_stats_utils', () => {
 
       (DETAIL_SECTIONS as any).push(errorSection);
 
-      const details = await fetchFieldDetails('fieldName', 'string', mockDataset, mockServices);
+      const details = await fetchFieldDetails(
+        'fieldName',
+        'string',
+        mockDataset,
+        mockServices,
+        mockQueueManager
+      );
 
       expect((details as any).errorSection).toEqual({ errorMessage: 'Error: Fetch failed' });
     });
@@ -336,7 +369,13 @@ describe('field_stats_utils', () => {
 
       (DETAIL_SECTIONS as any).push(mockTopValuesSection);
 
-      await fetchFieldDetails('fieldName', 'string', datasetWithoutType, mockServices);
+      await fetchFieldDetails(
+        'fieldName',
+        'string',
+        datasetWithoutType,
+        mockServices,
+        mockQueueManager
+      );
 
       expect(mockTopValuesSection.fetchData).toHaveBeenCalledWith(
         'fieldName',
@@ -348,7 +387,13 @@ describe('field_stats_utils', () => {
     it('returns empty object when no sections applicable', async () => {
       (DETAIL_SECTIONS as any).push(mockNumericSection);
 
-      const details = await fetchFieldDetails('fieldName', 'string', mockDataset, mockServices);
+      const details = await fetchFieldDetails(
+        'fieldName',
+        'string',
+        mockDataset,
+        mockServices,
+        mockQueueManager
+      );
 
       expect(Object.keys(details)).toHaveLength(0);
     });
@@ -374,6 +419,7 @@ describe('field_stats_utils', () => {
     let setFieldDetails: jest.Mock;
     let detailsLoading: Set<string>;
     let setDetailsLoading: jest.Mock;
+    let mockQueueManager: jest.Mocked<QueryQueueManager>;
 
     beforeEach(() => {
       expandedRows = new Set();
@@ -382,6 +428,17 @@ describe('field_stats_utils', () => {
       setFieldDetails = jest.fn();
       detailsLoading = new Set();
       setDetailsLoading = jest.fn();
+
+      // Mock QueryQueueManager to execute queries immediately
+      const mockEnqueue = jest.fn((fn) => fn());
+      const mockClear = jest.fn();
+      mockQueueManager = {
+        enqueue: mockEnqueue,
+        clear: mockClear,
+      } as any;
+      (QueryQueueManager as jest.MockedClass<typeof QueryQueueManager>).mockImplementation(
+        () => mockQueueManager
+      );
     });
 
     it('expands a collapsed row', async () => {
@@ -394,7 +451,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -413,7 +471,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -431,7 +490,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('nonExistentField');
@@ -450,7 +510,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         null,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -470,7 +531,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -492,7 +554,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -516,7 +579,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -545,7 +609,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');
@@ -575,7 +640,8 @@ describe('field_stats_utils', () => {
         detailsLoading,
         setDetailsLoading,
         mockDataset,
-        mockServices
+        mockServices,
+        mockQueueManager
       );
 
       await handler('field1');

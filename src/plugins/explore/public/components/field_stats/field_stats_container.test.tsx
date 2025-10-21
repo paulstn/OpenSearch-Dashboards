@@ -6,7 +6,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 
-// Mock the data plugin before any imports that use it
 jest.mock('../../../../data/public', () => ({
   indexPatterns: {
     isDefault: jest.fn(() => true),
@@ -17,6 +16,7 @@ jest.mock('../../application/context/dataset_context/dataset_context');
 jest.mock('../../../../opensearch_dashboards_react/public');
 jest.mock('./utils/field_stats_utils');
 jest.mock('./field_stats_queries');
+jest.mock('./utils/query_queue_manager');
 jest.mock('./field_stats_table', () => ({
   FieldStatsTable: jest.fn(() => <div data-test-subj="field-stats-table">Mocked Table</div>),
 }));
@@ -34,6 +34,7 @@ import {
   getFieldStatsQuery,
   executeFieldStatsQuery,
 } from './field_stats_queries';
+import { QueryQueueManager } from './utils/query_queue_manager';
 import { FieldStatsTable } from './field_stats_table';
 import {
   createMockServices,
@@ -61,6 +62,7 @@ const mockGetFieldStatsQuery = getFieldStatsQuery as jest.MockedFunction<typeof 
 const mockExecuteFieldStatsQuery = executeFieldStatsQuery as jest.MockedFunction<
   typeof executeFieldStatsQuery
 >;
+const mockQueryQueueManager = QueryQueueManager as jest.MockedClass<typeof QueryQueueManager>;
 
 describe('FieldStatsContainer', () => {
   const mockServices = createMockServices();
@@ -78,6 +80,16 @@ describe('FieldStatsContainer', () => {
   });
 
   beforeEach(() => {
+    const mockEnqueue = jest.fn((fn) => fn());
+    const mockClear = jest.fn();
+    mockQueryQueueManager.mockImplementation(
+      () =>
+        ({
+          enqueue: mockEnqueue,
+          clear: mockClear,
+        } as any)
+    );
+
     mockUseOpenSearchDashboards.mockReturnValue({
       services: mockServices,
     } as any);
@@ -311,6 +323,31 @@ describe('FieldStatsContainer', () => {
         expect.any(Object),
         undefined
       );
+    });
+  });
+
+  it('uses QueryQueueManager to control query concurrency', async () => {
+    const mockEnqueue = jest.fn((fn) => fn());
+    mockQueryQueueManager.mockImplementation(
+      () =>
+        ({
+          enqueue: mockEnqueue,
+          clear: jest.fn(),
+        } as any)
+    );
+
+    mockUseDatasetContext.mockReturnValue({
+      dataset: mockDataset,
+    } as any);
+
+    render(<FieldStatsContainer />);
+
+    await waitFor(() => {
+      expect(mockEnqueue).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(mockEnqueue.mock.calls.length).toBeGreaterThanOrEqual(3);
     });
   });
 });

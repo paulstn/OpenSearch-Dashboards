@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { FieldStatsTable } from './field_stats_table';
 import { FieldStatsItem, FieldDetailsMap } from './utils/field_stats_types';
@@ -20,6 +20,8 @@ import {
   transformFieldStatsResult,
   createRowExpandHandler,
 } from './utils/field_stats_utils';
+import { QueryQueueManager } from './utils/query_queue_manager';
+import { FIELD_STATS_MAX_CONCURRENT_QUERIES } from './utils/constants';
 
 /**
  * Container component for the Field Statistics feature.
@@ -39,6 +41,13 @@ export const FieldStatsContainer = () => {
   const [fieldDetails, setFieldDetails] = useState<FieldDetailsMap>({});
   const [detailsLoading, setDetailsLoading] = useState<Set<string>>(new Set());
 
+  // useRef to persist across renders
+  const queryQueueRef = useRef<QueryQueueManager | null>(null);
+  if (!queryQueueRef.current) {
+    queryQueueRef.current = new QueryQueueManager(FIELD_STATS_MAX_CONCURRENT_QUERIES);
+  }
+  const queryQueue = queryQueueRef.current;
+
   const fields = useMemo(() => {
     if (!dataset) return [];
     return filterDatasetFields(dataset);
@@ -51,15 +60,12 @@ export const FieldStatsContainer = () => {
       setIsLoading(true);
 
       try {
-        // Step 1: fetch total document count
+        // fetch total document count
         const totalDocCount = await (async () => {
           try {
             const totalCountQuery = getTotalDocCountQuery(dataset.title);
-            const totalCountResult = await executeFieldStatsQuery(
-              services,
-              totalCountQuery,
-              dataset.id || '',
-              dataset.type
+            const totalCountResult = await queryQueue.enqueue(() =>
+              executeFieldStatsQuery(services, totalCountQuery, dataset.id || '', dataset.type)
             );
             const totalHits = totalCountResult?.hits?.hits || [];
             const totalFirstHit = totalHits[0]?._source || {};
@@ -69,16 +75,13 @@ export const FieldStatsContainer = () => {
           }
         })();
 
-        // Step 2: fetch field stats per row
+        // fetch field stats per row
         const results = await Promise.allSettled(
           fields.map(async (field) => {
             try {
               const query = getFieldStatsQuery(dataset.title, field.name);
-              const result = await executeFieldStatsQuery(
-                services,
-                query,
-                dataset.id || '',
-                dataset.type
+              const result = await queryQueue.enqueue(() =>
+                executeFieldStatsQuery(services, query, dataset.id || '', dataset.type)
               );
 
               return {
@@ -116,6 +119,8 @@ export const FieldStatsContainer = () => {
     };
 
     fetchAllFieldStats();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields, dataset, services]);
 
   const handleRowExpand = createRowExpandHandler(
@@ -127,7 +132,8 @@ export const FieldStatsContainer = () => {
     detailsLoading,
     setDetailsLoading,
     dataset,
-    services
+    services,
+    queryQueue
   );
 
   const sortedFieldStats = useMemo(() => {

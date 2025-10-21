@@ -13,6 +13,7 @@ import {
   IndexPatternField,
 } from './field_stats_types';
 import { DETAIL_SECTIONS } from '../field_stats_detail_sections';
+import { QueryQueueManager } from './query_queue_manager';
 
 /**
  * Filter dataset fields to remove meta fields, multi-fields, and scripted fields
@@ -87,13 +88,15 @@ export function getApplicableSections(fieldType: string): DetailSectionConfig[] 
  * @param fieldType The field type
  * @param dataset The dataset to query (must have type property)
  * @param services OpenSearch Dashboards services
+ * @param queryQueue Query queue manager to control concurrency
  * @returns Object containing all fetched details keyed by section id
  */
 export async function fetchFieldDetails(
   fieldName: string,
   fieldType: string,
   dataset: any,
-  services: ExploreServices
+  services: ExploreServices,
+  queryQueue: QueryQueueManager
 ): Promise<FieldDetails> {
   // Ensure dataset has required properties
   const safeDataset: Dataset = {
@@ -106,11 +109,13 @@ export async function fetchFieldDetails(
 
   const applicableSections = getApplicableSections(fieldType);
 
-  // fetch all applicable sections in parallel
+  // fetch all applicable sections in parallel (controlled by query queue)
   const results = await Promise.allSettled(
     applicableSections.map(async (section) => {
       try {
-        const data = await section.fetchData(fieldName, safeDataset, services);
+        const data = await queryQueue.enqueue(() =>
+          section.fetchData(fieldName, safeDataset, services)
+        );
         return { id: section.id, data };
       } catch (error) {
         const errorMessage = error?.body?.message || String(error);
@@ -146,6 +151,7 @@ export async function fetchFieldDetails(
  * @param setDetailsLoading Setter for details loading state
  * @param dataset Current dataset
  * @param services OpenSearch Dashboards services
+ * @param queryQueue Query queue manager to control concurrency
  * @returns Handler function for row expansion
  */
 export function createRowExpandHandler(
@@ -157,7 +163,8 @@ export function createRowExpandHandler(
   detailsLoading: Set<string>,
   setDetailsLoading: (updater: (prev: Set<string>) => Set<string>) => void,
   dataset: any,
-  services: ExploreServices
+  services: ExploreServices,
+  queryQueue: QueryQueueManager
 ) {
   return async (fieldName: string) => {
     const newExpanded = new Set(expandedRows);
@@ -181,7 +188,7 @@ export function createRowExpandHandler(
     setDetailsLoading((prev) => new Set(prev).add(fieldName));
 
     try {
-      const details = await fetchFieldDetails(fieldName, field.type, dataset, services);
+      const details = await fetchFieldDetails(fieldName, field.type, dataset, services, queryQueue);
       setFieldDetails((prev) => ({ ...prev, [fieldName]: details }));
     } catch (error) {
       const errorMessage = error?.body?.message || String(error);
