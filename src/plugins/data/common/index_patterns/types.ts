@@ -55,6 +55,8 @@ export interface IIndexPattern {
   intervalName?: string | null;
   signalType?: string;
   schemaMappings?: Record<string, Record<string, string>>;
+  dataSourceVersion?: string;
+  dataSourceEngineType?: string;
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
@@ -228,6 +230,8 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   dataSourceRef?: SavedObjectReference;
+  dataSourceVersion?: string;
+  dataSourceEngineType?: string;
   fieldsLoading?: boolean;
   schemaMappings?: Record<string, Record<string, string>>;
 }

@@ -296,6 +296,7 @@ export class DataPublicPlugin
       indexPatterns,
       application: core.application,
       notifications,
+      http,
     });
     setQueryService(query);
 

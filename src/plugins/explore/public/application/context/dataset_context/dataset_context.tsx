@@ -64,6 +64,12 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const onlyCheckCache = datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
         let dataView = await dataViews.get(datasetFromState.id, onlyCheckCache);
 
+        if (dataView && datasetFromState.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+          dataView.dataSourceVersion = datasetFromState.dataSourceVersion;
+          dataView.dataSourceEngineType = datasetFromState.dataSourceEngineType;
+          dataViews.saveToCache(datasetFromState.id, dataView);
+        }
+
         if (!dataView) {
           // Cache the dataset
           await queryString.getDatasetService().cacheDataset(

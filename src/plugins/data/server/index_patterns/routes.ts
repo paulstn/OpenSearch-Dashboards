@@ -150,4 +150,38 @@ export function registerRoutes(http: HttpServiceSetup) {
       }
     }
   );
+
+  router.get(
+    {
+      path: '/api/data/local_cluster_info',
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const client = context.core.opensearch.client.asCurrentUser;
+        const { body } = await client.info();
+
+        const dataSourceVersion = body.version.number;
+        const dataSourceEngineType =
+          body.version.distribution === 'opensearch' ? 'OpenSearch' : 'Elasticsearch';
+
+        return response.ok({
+          body: {
+            dataSourceVersion,
+            dataSourceEngineType,
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to fetch local cluster info',
+          },
+        });
+      }
+    }
+  );
 }

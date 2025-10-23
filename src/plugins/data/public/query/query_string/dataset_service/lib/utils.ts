@@ -95,3 +95,51 @@ export const getRemoteClusterIndices = async (
     return [];
   }
 };
+
+let cachedLocalClusterInfo: { dataSourceVersion: string; dataSourceEngineType: string } | undefined;
+
+export const fetchLocalClusterInfo = async (
+  http: HttpSetup
+): Promise<{ dataSourceVersion: string; dataSourceEngineType: string }> => {
+  if (cachedLocalClusterInfo) {
+    return cachedLocalClusterInfo;
+  }
+
+  try {
+    const result = await http.get<{ dataSourceVersion: string; dataSourceEngineType: string }>(
+      '/api/data/local_cluster_info'
+    );
+    cachedLocalClusterInfo = result;
+    return result;
+  } catch (error) {
+    const defaultInfo = {
+      dataSourceVersion: '',
+      dataSourceEngineType: 'OpenSearch',
+    };
+    cachedLocalClusterInfo = defaultInfo;
+    return defaultInfo;
+  }
+};
+
+/**
+ * Extracts version information from a data structure or falls back to local cluster info.
+ * Used by dataset type configs to populate version fields in Dataset objects.
+ */
+export const getVersionInfo = (
+  parent?: DataStructure
+): { dataSourceVersion: string; dataSourceEngineType: string } => {
+  const parentMeta = parent?.meta as DataStructure['meta'] & {
+    dataSourceVersion?: string;
+    dataSourceEngineType?: string;
+  };
+
+  if (parent && parentMeta?.dataSourceVersion !== undefined) {
+    return {
+      dataSourceVersion: parentMeta.dataSourceVersion || '',
+      dataSourceEngineType: parentMeta.dataSourceEngineType || '',
+    };
+  }
+
+  const { getQueryService } = require('../../../../services');
+  return getQueryService().queryString.getDatasetService().getLocalClusterInfo();
+};

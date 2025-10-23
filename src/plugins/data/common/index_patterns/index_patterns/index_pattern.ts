@@ -102,6 +102,8 @@ export class IndexPattern implements IIndexPattern {
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
+  public dataSourceVersion?: string;
+  public dataSourceEngineType?: string;
   public fieldsLoading?: boolean;
   public schemaMappings?: Record<string, Record<string, string>>;
   private originalSavedObjectBody: SavedObjectBody = {};
@@ -152,6 +154,8 @@ export class IndexPattern implements IIndexPattern {
       return this.deserializeFieldFormatMap(mapping);
     });
     this.dataSourceRef = spec.dataSourceRef;
+    this.dataSourceVersion = spec.dataSourceVersion;
+    this.dataSourceEngineType = spec.dataSourceEngineType;
     this.fieldsLoading = spec.fieldsLoading;
   }
 

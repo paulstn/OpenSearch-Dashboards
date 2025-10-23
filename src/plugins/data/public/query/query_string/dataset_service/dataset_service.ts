@@ -10,6 +10,7 @@ import {
   Dataset,
   DataStorage,
   DataStructure,
+  DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
   IndexPatternFieldMap,
   IndexPatternSpec,
@@ -25,6 +26,7 @@ export class DatasetService {
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
+  private localClusterInfo?: { dataSourceVersion: string; dataSourceEngineType: string };
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -47,8 +49,19 @@ export class DatasetService {
     this.registerType(indexTypeConfig);
   }
 
-  public async init(indexPatterns: IndexPatternsContract): Promise<void> {
+  public async init(indexPatterns: IndexPatternsContract, http: CoreStart['http']): Promise<void> {
     this.indexPatterns = indexPatterns;
+
+    try {
+      const { fetchLocalClusterInfo } = await import('./lib/utils');
+      this.localClusterInfo = await fetchLocalClusterInfo(http);
+    } catch (error) {
+      this.localClusterInfo = {
+        dataSourceVersion: '',
+        dataSourceEngineType: 'OpenSearch',
+      };
+    }
+
     this.defaultDataset = await this.fetchDefaultDataset();
   }
 
@@ -66,6 +79,10 @@ export class DatasetService {
 
   public getDefault(): Dataset | undefined {
     return this.defaultDataset;
+  }
+
+  public getLocalClusterInfo(): { dataSourceVersion: string; dataSourceEngineType: string } {
+    return this.localClusterInfo || { dataSourceVersion: '', dataSourceEngineType: 'OpenSearch' };
   }
 
   private serializeRecentDatasets(): void {
@@ -122,6 +139,8 @@ export class DatasetService {
                 type: dataset.dataSource.type,
               }
             : undefined,
+          dataSourceVersion: dataset.dataSourceVersion,
+          dataSourceEngineType: dataset.dataSourceEngineType,
         } as IndexPatternSpec;
 
         if (defaultCache) {
@@ -203,6 +222,8 @@ export class DatasetService {
                 type: dataset.dataSource.type,
               }
             : undefined,
+          dataSourceVersion: dataset.dataSourceVersion,
+          dataSourceEngineType: dataset.dataSourceEngineType,
         } as IndexPatternSpec;
 
         // TODO: For async field loading (when asyncType is true), the data view is created
@@ -362,6 +383,11 @@ export class DatasetService {
                 id: dataSource.id,
                 title: dataSource.attributes?.title,
                 type: dataSource.attributes?.dataSourceEngineType || '',
+                meta: {
+                  type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+                  dataSourceVersion: dataSource.attributes?.dataSourceVersion,
+                  dataSourceEngineType: dataSource.attributes?.dataSourceEngineType,
+                },
               }
             : undefined,
         },

@@ -23,6 +23,7 @@ import {
   getRemoteClusterConnections,
   getRemoteClusterIndices,
   injectMetaToDataStructures,
+  getVersionInfo,
 } from './utils';
 import { DataSourceEngineType } from '../../../../../../../plugins/data_source/common/data_sources';
 import { IndexDataStructureCreator } from './index_data_structure_creator/index_data_structure_creator';
@@ -42,6 +43,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
     const indexMeta = index.meta as DataStructureCustomMeta;
+    const { dataSourceVersion, dataSourceEngineType } = getVersionInfo(dataSource);
 
     return {
       id: index.id,
@@ -56,6 +58,8 @@ export const indexTypeConfig: DatasetTypeConfig = {
             type: dataSource.type,
           }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
+      dataSourceVersion,
+      dataSourceEngineType,
     } as Dataset;
   },
 
@@ -179,10 +183,12 @@ const mapDataSourceSavedObjectToDataStructure = (
     title: dataSourceTitle,
     type: 'DATA_SOURCE',
     remoteConnections: relevantRemoteConnections,
-    meta:
-      relevantRemoteConnections && relevantRemoteConnections.length > 0
+    meta: {
+      type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+      dataSourceVersion: savedObject.attributes.dataSourceVersion,
+      dataSourceEngineType: savedObject.attributes.dataSourceEngineType,
+      ...(relevantRemoteConnections && relevantRemoteConnections.length > 0
         ? {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             additionalAppendIcons: [
               {
                 type: 'iInCircle',
@@ -199,7 +205,8 @@ const mapDataSourceSavedObjectToDataStructure = (
               },
             ],
           }
-        : undefined,
+        : {}),
+    },
   };
 };
 

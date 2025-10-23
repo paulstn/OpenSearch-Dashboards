@@ -285,6 +285,10 @@ export interface Dataset extends BaseDataset {
   description?: string;
   /** Optional schema mappings that map schema concepts to field names */
   schemaMappings?: Record<string, Record<string, string>>;
+  /** Version of the data source (optional, may be empty string if unavailable) */
+  dataSourceVersion?: string;
+  /** Engine type of the data source (optional, defaults to OpenSearch if unavailable) */
+  dataSourceEngineType?: string;
 }
 
 export interface DatasetField {

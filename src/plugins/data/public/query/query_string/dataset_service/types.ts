@@ -69,7 +69,7 @@ export interface DatasetTypeConfig {
   };
   /**
    * Converts a DataStructure to a Dataset.
-   * @param {DataStructure} dataStructure - The data structure to convert.
+   * @param {DataStructure[]} path - The path of data structures to convert.
    * @returns {Dataset} Dataset.
    */
   toDataset: (path: DataStructure[]) => Dataset;

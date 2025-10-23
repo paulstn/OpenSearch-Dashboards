@@ -6,6 +6,7 @@
 import {
   ApplicationSetup,
   ApplicationStart,
+  HttpSetup,
   IUiSettingsClient,
   NotificationsSetup,
   NotificationsStart,
@@ -57,4 +58,5 @@ export interface QueryServiceStartDependencies {
   indexPatterns: IndexPatternsService;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  http: HttpSetup;
 }
